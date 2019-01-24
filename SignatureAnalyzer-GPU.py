@@ -355,8 +355,9 @@ def main():
         dataset = pd.read_csv(args.data, sep='\t', header=0, index_col=0)
     else:
         dataset = pd.read_csv(args.data, sep='\t', header=None)
-
-
+    if any(dataset.sum(1) > 0):
+        dataset = dataset[dataset.sum(1) > 0]
+        print('WARNING: Dropping rows with zero sum')
 
     if args.parameters_file == None:
         if args.objective.lower() == 'poisson':

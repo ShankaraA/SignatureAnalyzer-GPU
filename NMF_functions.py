@@ -98,15 +98,15 @@ def update_H_gaussian_L1(H,W,lambda_,phi,V,eps_):
     #beta = 2 gamma(beta) = 1
     V_ap = tf.matmul(W, H) + eps_
     denom = tf.matmul(W,V_ap,transpose_a=True) + tf.reshape(tf.divide(phi, lambda_ ),[-1,1]) + eps_
-    update = tf.divide(tf.matmul(W,V,transpose_a=True),denom)
-    return tf.multiply(H,update)
+    #update = tf.divide(tf.matmul(W,V,transpose_a=True),denom)
+    return tf.multiply(H,tf.divide(tf.matmul(W,V,transpose_a=True),denom))
 
 def update_H_gaussian_L2(H,W,lambda_,phi,V,eps_):
     #beta = 2 zeta(beta) = 1
     V_ap = tf.matmul(W, H) + eps_
     denom = tf.matmul(W,V_ap,transpose_a=True) + tf.divide(phi * H, tf.reshape(lambda_,[-1,1]) ) + eps_
-    update = tf.divide(tf.matmul(W,V,transpose_a=True),denom)
-    return tf.multiply(H,update)
+    #update = tf.divide(tf.matmul(W,V,transpose_a=True),denom)
+    return tf.multiply(H,tf.divide(tf.matmul(W,V,transpose_a=True),denom))
 
 def update_W_poisson_L1(H, W, lambda_, phi, V, eps_):
     #beta = 1 gamma(beta) = 1
@@ -128,8 +128,8 @@ def update_W_gaussian_L1(H,W,lambda_,phi,V,eps_):
     #beta = 2 gamma(beta) = 1
     V_ap = tf.matmul(W,H) + eps_
     denom = tf.matmul(V_ap,t(H)) + tf.divide(phi,lambda_) + eps_
-    update = tf.divide(tf.matmul(V,t(H)),denom)
-    return tf.multiply(W,update)
+    #update = tf.divide(tf.matmul(V,t(H)),denom)
+    return tf.multiply(W,tf.divide(tf.matmul(V,t(H)),denom))
 
 def update_W_gaussian_L2(H,W,lambda_,phi,V,eps_):
     #beta = 2 zeta(beta) = 1
