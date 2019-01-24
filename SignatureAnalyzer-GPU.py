@@ -181,7 +181,7 @@ def run_NMF_parameter_search(parameters,data,objective,max_iter=10000,report_fre
                                                   ,H_prior=parameters['prior_on_H'][parameter_index]
                                                   ,W_prior=parameters['prior_on_W'][parameter_index])
 
-    
+
                 h_ = method.update_H(job_dict[parameters['label'][parameter_index]].H,
                                  job_dict[parameters['label'][parameter_index]].W,
                                  job_dict[parameters['label'][parameter_index]].Lambda,
@@ -337,6 +337,7 @@ def main():
 
     parser.add_argument('--output_file', help='output_file_name if run in array mode this correspond to the output directory', required=True)
     parser.add_argument('--labeled', help='Input has row and column labels', required=False,default=False, action='store_true')
+    parser.add_argument('--parquet', help='Input in parquet format', required=False, default=False, action='store_true')
     parser.add_argument('--report_frequency', help='Number of iterations between progress reports', required=False,
                         default=100, type=int)
 
@@ -351,13 +352,16 @@ def main():
     print('Reading data frame from '+ args.data)
 
 
-    if args.labeled:
-        dataset = pd.read_csv(args.data, sep='\t', header=0, index_col=0)
+    if args.parquet:
+        dataset = pd.read_parquet(args.data)
     else:
-        dataset = pd.read_csv(args.data, sep='\t', header=None)
-    if any(dataset.sum(1) > 0):
-        dataset = dataset[dataset.sum(1) > 0]
-        print('WARNING: Dropping rows with zero sum')
+        if args.labeled:
+            dataset = pd.read_csv(args.data, sep='\t', header=0, index_col=0)
+        else:
+            dataset = pd.read_csv(args.data, sep='\t', header=None)
+        if any(dataset.sum(1) > 0):
+            dataset = dataset[dataset.sum(1) > 0]
+            print('WARNING: Dropping rows with zero sum')
 
     if args.parameters_file == None:
         if args.objective.lower() == 'poisson':
