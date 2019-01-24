@@ -102,7 +102,9 @@ def update_H_gaussian_L1(H,W,lambda_,phi,V,eps_):
     #W_update = tf.placeholder(tf.float32, shape=(self.M,self.K0))
     print(W.shape)
     print(V.shape)
-    matmul = tf.matmul(W,V,transpose_a=True)
+    #matmul = tf.matmul(W,V,transpose_a=True)
+    matmul = tf.matmul(t(W),V)
+
     update = tf.divide(matmul,denom)
     return tf.multiply(H,update)
 
