@@ -1,3 +1,4 @@
+import feather
 import pandas as pd
 import tensorflow as tf
 import numpy as np
@@ -11,16 +12,12 @@ import pickle
 
 import NMF_functions
 
-
 def createFolder(directory):
     try:
         if not os.path.exists(directory):
             os.makedirs(directory)
     except OSError:
         print ('Error: Creating directory. ' +  directory)
-
-
-
 
 
 class ARD_NMF:
@@ -68,7 +65,8 @@ class ARD_NMF:
         self.W = tf.Variable(W0, dtype=tf.float32, name='W')
         self.H = tf.Variable(H0, dtype=tf.float32, name='H')
         self.Lambda = tf.Variable(L0, dtype=tf.float32, name='Lambda')
-
+        self.W_update = tf.placeholder(tf.float32, shape=(self.M,self.K0))
+        self.H_update = tf.placeholder(tf.float32, shape=(self.K0,self.N))
 
         # calculate default b as described in Tan and Fevotte (2012)
         if self.b == None or self.b == 'None':
@@ -194,7 +192,8 @@ def run_NMF_parameter_search(parameters,data,objective,max_iter=10000,report_fre
                                  job_dict[parameters['label'][parameter_index]].Lambda,
                                  job_dict[parameters['label'][parameter_index]].phi,
                                  job_dict[parameters['label'][parameter_index]].V,
-                                 job_dict[parameters['label'][parameter_index]].eps_)
+                                 job_dict[parameters['label'][parameter_index]].eps_,
+                                 job_dict[parameters['label'][parameter_index]].W_update)
 
                 lambda_ = method.lambda_update(job_dict[parameters['label'][parameter_index]].W,
                                         job_dict[parameters['label'][parameter_index]].H,
@@ -338,6 +337,7 @@ def main():
     parser.add_argument('--output_file', help='output_file_name if run in array mode this correspond to the output directory', required=True)
     parser.add_argument('--labeled', help='Input has row and column labels', required=False,default=False, action='store_true')
     parser.add_argument('--parquet', help='Input in parquet format', required=False, default=False, action='store_true')
+    parser.add_argument('--feather', help='Input in feather format', required=False, default=False, action='store_true')
     parser.add_argument('--report_frequency', help='Number of iterations between progress reports', required=False,
                         default=100, type=int)
 
@@ -354,14 +354,17 @@ def main():
 
     if args.parquet:
         dataset = pd.read_parquet(args.data)
+    elif args.feather:
+        print('loading feather...')
+        dataset = feather.read_dataframe(args.data)
     else:
         if args.labeled:
             dataset = pd.read_csv(args.data, sep='\t', header=0, index_col=0)
         else:
             dataset = pd.read_csv(args.data, sep='\t', header=None)
-        if any(dataset.sum(1) > 0):
-            dataset = dataset[dataset.sum(1) > 0]
-            print('WARNING: Dropping rows with zero sum')
+        #if any(dataset.sum(1) > 0):
+        #    dataset = dataset[dataset.sum(1) > 0]
+        #    print('WARNING: Dropping rows with zero sum')
 
     if args.parameters_file == None:
         if args.objective.lower() == 'poisson':

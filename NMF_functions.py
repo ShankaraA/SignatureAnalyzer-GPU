@@ -99,7 +99,12 @@ def update_H_gaussian_L1(H,W,lambda_,phi,V,eps_):
     V_ap = tf.matmul(W, H) + eps_
     denom = tf.matmul(W,V_ap,transpose_a=True) + tf.reshape(tf.divide(phi, lambda_ ),[-1,1]) + eps_
     #update = tf.divide(tf.matmul(W,V,transpose_a=True),denom)
-    return tf.multiply(H,tf.divide(tf.matmul(W,V,transpose_a=True),denom))
+    #W_update = tf.placeholder(tf.float32, shape=(self.M,self.K0))
+    print(W.shape)
+    print(V.shape)
+    matmul = tf.matmul(W,V,transpose_a=True)
+    update = tf.divide(matmul,denom)
+    return tf.multiply(H,update)
 
 def update_H_gaussian_L2(H,W,lambda_,phi,V,eps_):
     #beta = 2 zeta(beta) = 1
@@ -167,4 +172,3 @@ def update_lambda_L1_L2(W,H,b0,C,eps_):
 
 def update_lambda_L2_L1(W,H,b0,C,eps_):
     return tf.divide(0.5*tf.reduce_sum(tf.pow(W,2), axis=0) + tf.reduce_sum(H,axis=1)+b0,C)
-
